@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+const r=Router(); const token=u=>jwt.sign({id:String(u._id),email:u.email},process.env.JWT_SECRET,{expiresIn:'7d'});
+r.post('/register',async(req,res)=>{try{const {email,password}=req.body;if(!email||!password||password.length<8)return res.status(400).json({error:'EMAIL_AND_8_CHAR_PASSWORD_REQUIRED'});const exists=await User.findOne({email});if(exists)return res.status(409).json({error:'EMAIL_EXISTS'});const u=await User.create({email,passwordHash:await bcrypt.hash(password,12)});res.cookie('token',token(u),{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:7*864e5});res.json({user:{email:u.email}});}catch(e){res.status(500).json({error:'REGISTER_FAILED'});}});
+r.post('/login',async(req,res)=>{try{const {email,password}=req.body,u=await User.findOne({email});if(!u||!(await bcrypt.compare(password,u.passwordHash)))return res.status(401).json({error:'INVALID_CREDENTIALS'});res.cookie('token',token(u),{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:7*864e5});res.json({user:{email:u.email}});}catch{res.status(500).json({error:'LOGIN_FAILED'});}});
+r.post('/logout',(req,res)=>{res.clearCookie('token');res.json({ok:true});});
+r.get('/me',async(req,res)=>{res.json({user:req.user||null});});
+export default r;

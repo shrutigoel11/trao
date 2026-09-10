@@ -1,0 +1,2 @@
+import './globals.css'; import Link from 'next/link';
+export default function Layout({children}:{children:React.ReactNode}){return <html><body><header className="border-b bg-white"><div className="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center"><Link href="/" className="font-black text-xl">Trao Interview Kit</Link><nav className="flex gap-4 text-sm"><Link href="/kits">Kits</Link><Link href="/kits/new">New Kit</Link></nav></div></header>{children}</body></html>}
