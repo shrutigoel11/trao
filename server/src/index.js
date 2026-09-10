@@ -1,4 +1,6 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -7,6 +9,12 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import authRoutes from './routes/auth.js';
 import kitsRoutes from './routes/kits.js';
+
+// npm --prefix server runs this file with `server/` as the working directory,
+// while deployment and local setup keep the shared environment file at the
+// repository root. Resolve it from this module, never from process.cwd().
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+dotenv.config({ path: path.join(repoRoot, '.env') });
 const app=express();
 app.use(cors({origin:process.env.CLIENT_URL||'http://localhost:3000',credentials:true}));
 app.use(express.json({limit:'2mb'}));app.use(cookieParser());
